@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -43,8 +44,8 @@ class QRScannerPage extends StatefulWidget {
 class _QRScannerPageState extends State<QRScannerPage> {
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey();
-  Barcode? result;
-  final ValueNotifier _result = ValueNotifier<Barcode?>(null);
+
+  final ValueNotifier<Barcode?> _result = ValueNotifier<Barcode?>(null);
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -92,6 +93,23 @@ class _QRScannerPageState extends State<QRScannerPage> {
               },
             ),
           ),
+          Expanded(
+              flex: 1,
+              child: Column(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: _result,
+                    builder: (BuildContext context, Barcode? result, _) {
+                      if (result != null) {
+                        return Text(
+                            'Barcode Type: ${describeEnum(result.format)} \nData: ${result.code}');
+                      } else {
+                        return const Text('Scan a code');
+                      }
+                    },
+                  ),
+                ],
+              )),
         ],
       ),
     );
