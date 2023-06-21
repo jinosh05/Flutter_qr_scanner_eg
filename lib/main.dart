@@ -67,6 +67,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
     return Scaffold(
       body: Column(
         children: [
@@ -108,6 +109,28 @@ class _QRScannerPageState extends State<QRScannerPage> {
                       }
                     },
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FutureBuilder(
+                        future: controller?.getFlashStatus(),
+                        builder: (context, snapshot) {
+                          return InkWell(
+                            onTap: () async {
+                              await controller?.toggleFlash();
+                              setState(() {});
+                            },
+                            child: Icon(
+                              snapshot.data == true
+                                  ? Icons.flash_on
+                                  : Icons.flash_off,
+                              size: height * 0.05,
+                            ),
+                          );
+                        },
+                      )
+                    ],
+                  )
                 ],
               )),
         ],
