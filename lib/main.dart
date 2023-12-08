@@ -5,15 +5,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-void main(List<String> args) {
-  runApp(MaterialApp(
-    theme: ThemeData(useMaterial3: true),
-    home: const MyHome(),
-  ));
+void main() {
+  runApp(
+    MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const Main(),
+    ),
+  );
 }
 
-class MyHome extends StatelessWidget {
-  const MyHome({super.key});
+/// Main App
+class Main extends StatelessWidget {
+  /// Constructor
+  const Main({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +27,23 @@ class MyHome extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
                 builder: (context) => const QRScannerPage(),
-              ));
-            },
-            child: const Text("Scan Code")),
+              ),
+            );
+          },
+          child: const Text("Scan Code"),
+        ),
       ),
     );
   }
 }
 
+/// QRScannerPage
 class QRScannerPage extends StatefulWidget {
+  /// QRScannerPage
   const QRScannerPage({super.key});
 
   @override
@@ -47,27 +56,23 @@ class _QRScannerPageState extends State<QRScannerPage> {
 
   final ValueNotifier<Barcode?> _result = ValueNotifier<Barcode?>(null);
 
-  // In order to get hot reload to work we need to pause the camera if the platform
+  // In order to get hot reload to work we need to pause the camera
+  // if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      controller?.pauseCamera();
     }
-    controller!.resumeCamera();
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
+    controller?.resumeCamera();
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Column(
         children: [
@@ -79,7 +84,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
               ),
               key: qrKey,
               onPermissionSet: (ctrl, permission) {
-                log('${DateTime.now().toIso8601String()}_onPermissionSet $permission');
+                log('onPermissionSet $permission');
                 if (!permission) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('no Permission')),
@@ -95,46 +100,53 @@ class _QRScannerPageState extends State<QRScannerPage> {
             ),
           ),
           Expanded(
-              flex: 1,
-              child: Column(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: _result,
-                    builder: (BuildContext context, Barcode? result, _) {
-                      if (result != null) {
-                        return Text(
-                            'Barcode Type: ${describeEnum(result.format)} \nData: ${result.code}');
-                      } else {
-                        return const Text('Scan a code');
-                      }
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FutureBuilder(
-                        future: controller?.getFlashStatus(),
-                        builder: (context, snapshot) {
-                          return InkWell(
-                            onTap: () async {
+            child: Column(
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: _result,
+                  builder: (BuildContext context, Barcode? result, _) {
+                    return Text(
+                      result != null
+                          ? '''
+Barcode Type: ${describeEnum(result.format)} \nData: ${result.code}'''
+                          : 'Scan a code',
+                    );
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FutureBuilder(
+                      future: controller?.getFlashStatus(),
+                      builder: (context, snapshot) {
+                        return InkWell(
+                          onTap: () async {
+                            setState(() async {
                               await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: Icon(
-                              snapshot.data == true
-                                  ? Icons.flash_on
-                                  : Icons.flash_off,
-                              size: height * 0.05,
-                            ),
-                          );
-                        },
-                      )
-                    ],
-                  )
-                ],
-              )),
+                            });
+                          },
+                          child: Icon(
+                            snapshot.data ?? true
+                                ? Icons.flash_off
+                                : Icons.flash_on,
+                            size: height * 0.05,
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 }
