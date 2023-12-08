@@ -1,5 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.qr_scanner_eg">
+   <application
         android:label="qr_scanner_eg"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
